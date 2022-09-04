@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fdringdown"
+version = "0.0.1"
+authors = [
+  { name="Eliot Finch", email="efinch@star.sr.bham.ac.uk" },
+  { name="Christopher J. Moore", email="cmoore@star.sr.bham.ac.uk"},
+]
+description = "Frequency-domain analysis of ringdown signals"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "quaternionic",
+    "spherical",
+    "qnm",
+    "sxs",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/EliotFinch/fdringdown"
