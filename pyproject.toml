@@ -17,10 +17,10 @@ dependencies = [
     "numpy",
     "scipy",
     "matplotlib",
-    "quaternionic",
-    "spherical",
+    "corner",
     "qnm",
-    "sxs",
+    "dynesty"
+    "gwosc"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
