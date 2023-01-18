@@ -1,1 +1,1 @@
-from .waveforms import ringdown_v2
+from .waveforms import ringdown

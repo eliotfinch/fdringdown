@@ -9,30 +9,9 @@ c = 299792458.0
 # Dynesty requires array inputs (instead of dictionaries), and so we need to
 # define a order for the parameters. Use the parameter type, not the shorter
 # label.
-# param_order = [
-#     'central_times',
-#     'w_regular_amplitudes',
-#     'w_mirror_amplitudes',
-#     'w_regular_phases',
-#     'w_mirror_phases',
-#     'frequencies',
-#     'damping_times',
-#     'rd_regular_amplitudes',
-#     'rd_mirror_amplitudes',
-#     'rd_regular_phases',
-#     'rd_mirror_phases',
-#     'start_time',
-#     'mass',
-#     'spin',
-#     'frequency_deviation',
-#     'damping_time_deviation',
-#     'right_ascension',
-#     'declination',
-#     'event_time',
-#     'polarization_angle'
-#     ]
-
 param_order = [
+    
+    # Wavelets
     'central_times',
     'w_plus_amplitudes',
     'w_minus_amplitudes',
@@ -40,24 +19,33 @@ param_order = [
     'w_minus_phases',
     'frequencies',
     'damping_times',
+    
+    # Ringdown
+    'start_time',
     'rd_amplitudes',
     'rd_phases',
-    'inclination',
-    'azimuth',
-    'start_time',
     'mass',
     'spin',
+    'inclination',
+    'azimuth',
+    
+    # Extrinsic
     'right_ascension',
     'declination',
     'event_time',
     'polarization_angle'
+    
     ]
 
 # Add any parameters with periodic boundary conditions here
 periodic_params = [
+    
     'w_plus_phases',
     'w_minus_phases',
+    
     'rd_phases',
+    'azimuth'
+    
     'right_ascension',
     'polarization_angle'
     ]
@@ -67,7 +55,12 @@ reflective_params = [
     'declination'
     ]
 
+# Short labels used in the likelihood and for posterior files. Curly braces
+# are placeholders for numbers (because a given model may have multiple of
+# that parameter type).
 param_labels = {
+    
+    # Wavelets
     'central_times':'eta_{}',
     'w_plus_amplitudes':'Ap_w_{}',
     'w_minus_amplitudes':'Am_w_{}',
@@ -75,17 +68,51 @@ param_labels = {
     'w_minus_phases':'phim_w_{}',
     'frequencies':'nu_{}',
     'damping_times':'tau_{}',
+    
+    # Ringdown
+    'start_time':'t_0',
     'rd_amplitudes':'A_rd_{}',
     'rd_phases':'phi_rd_{}',
-    'inclination':'iota',
-    'azimuth':'varphi',
-    'start_time':'t_0',
     'mass':'M_f',
     'spin':'chi_f',
+    'inclination':'iota',
+    'azimuth':'varphi',
+    
+    # Extrinsic
     'right_ascension':'ra',
     'declination':'dec',
     'event_time':'t_event',
     'polarization_angle':'psi'
+    
+    }
+
+# LaTeX labels for plots
+latex_labels = {
+    
+    # Wavelets
+    'central_times': '$\eta_{}^\mathrm{{geo}}$',
+    'w_plus_amplitudes':'$\mathcal{{A}}^+_{}$',
+    'w_minus_amplitudes':'$\mathcal{{A}}^-_{}$',
+    'w_plus_phases':'$\Phi^+_{}$',
+    'w_minus_phases':'$\Phi^-_{}$',
+    'frequencies':'$\nu_{}$',
+    'damping_times':'$\tau_{}$',
+    
+    # Ringdown
+    'start_time':'$t_0^{\mathrm{geo}}$',
+    'rd_amplitudes':'$A_{}$',
+    'rd_phases':'$\phi_{}$',
+    'mass':'$M_f\ [M_\odot]$',
+    'spin':'$\chi_f$',
+    'inclination':'$\iota$',
+    'azimuth':'$\varphi$',
+    
+    # Extrinsic
+    'right_ascension':'$\alpha$',
+    'declination':'$\delta$',
+    'event_time':'$t_\mathrm{event}$',
+    'polarization_angle':'$\psi$'
+    
     }
 
 

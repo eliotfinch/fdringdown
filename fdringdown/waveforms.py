@@ -3,8 +3,7 @@ import numpy as np
 from pykerr import spheroidal
 from pykerr.qnm import qnmomega
 
-from .qnm import qnm
-from .utils import Msun, G, c, param_order
+from .utils import Msun, G, c, param_order, param_labels, latex_labels
 
 def wavelet(time, central_times, complex_amplitudes, frequencies, damping_times):
     r"""
@@ -80,9 +79,6 @@ class ringdown:
         # spin)
         self.N_params = 2*self.N_modes + 5
         
-        # Class to deal with converting mass and spin to a QNM frequency
-        self.qnm = qnm()
-        
         # Factor for unit conversion
         self.conversion = Msun*(G/c**3)
         
@@ -95,51 +91,58 @@ class ringdown:
         Also creates lists of the labels (self.labels_list and 
         self.latex_labels_list) ordered according to param_order in utils.
         """
-        # Label dictionary
+        # Parameter "types" used in this waveform (this should be a subset of 
+        # the param_order list from utils)
+        params = [
+            'start_time',
+            'rd_amplitudes',
+            'rd_phases',
+            'mass',
+            'spin',
+            'inclination',
+            'azimuth'
+            ]
+        
+        # Label dictionary: keys are the above param types, values are a list
+        # of shorter param labels
         self.labels = {}
+        for param_type in params:
+            label = param_labels[param_type]
+            if '{}' in label:
+                self.labels[param_type] = [label.format(n) for n in range(self.N_modes)]
+            else:
+                self.labels[param_type] = [label]
         
-        self.labels['rd_amplitudes'] = [
-            f'A_rd_{n}' for n in range(self.N_modes)]
-        
-        self.labels['rd_phases'] = [
-            f'phi_rd_{n}' for n in range(self.N_modes)]
-        
-        self.labels['inclination'] = ['iota']
-        self.labels['azimuth'] = ['varphi']
-        self.labels['start_time'] = ['t_0']
-        self.labels['mass'] = ['M_f']
-        self.labels['spin'] = ['chi_f']
-        
-        # Label list
+        # Label list: ordered list of all param labels used in this waveform
         self.labels_list = []
         for param_type in param_order:
-            if param_type in self.labels.keys():
+            if param_type in params:
                 self.labels_list += self.labels[param_type]
                 
-        # LaTeX label dictionary
+        # LaTeX label dictionary: same as self.labels, but values are a list
+        # of LaTeX labels
         self.latex_labels = {}
-        
-        self.latex_labels['rd_amplitudes'] = [
-            fr'$A_{n}$' for n in range(self.N_modes)]
-        self.latex_labels['rd_phases'] = [
-            fr'$\phi_{n}$' for n in range(self.N_modes)]
-        
-        self.latex_labels['inclination'] = [r'$\iota$']
-        self.latex_labels['azimuth'] = [r'$\varphi$']
-        self.latex_labels['start_time'] = [r'$t_0^{\mathrm{geo}}$']
-        self.latex_labels['mass'] = [r'$M_f\ [M_\odot]$']
-        self.latex_labels['spin'] = [r'$\chi_f$']
+        for param_type in params:
+            label = latex_labels[param_type]
+            if '{}' in label:
+                self.latex_labels[param_type] = [label.format(n) for n in range(self.N_modes)]
+            else:
+                self.latex_labels[param_type] = [label]
             
-        # LaTeX label list
+        # LaTeX label list: ordered list of all LaTeX param labels used in 
+        # this waveform
         self.latex_labels_list = []
         for param_type in param_order:
-            if param_type in self.latex_labels.keys():
+            if param_type in params:
                 self.latex_labels_list += self.latex_labels[param_type]
     
     def waveform(self, times, parameters):
         r"""
-        Construct a sum of the ringdown modes, using the base ringdown 
-        function.
+        Construct a ringdown waveform consisting of a sum of QNMs. Currently 
+        this neglects retrograde modes, and also assumes perturbations 
+        symmetric under equatorial relfections. See Eq. B2 in 
+        https://arxiv.org/abs/2107.05609
+        
 
         Parameters
         ----------
@@ -147,8 +150,8 @@ class ringdown:
             The times at which the waveform is evaluated.
             
         parameters : dict
-            Dictionary containing all required parameters. Call the class 
-            .labels() function to see the required keys.
+            Dictionary containing all required parameters. Inspect the class 
+            .labels to see the required keys.
 
         Returns
         -------
@@ -183,66 +186,8 @@ class ringdown:
         # Shift the time so that the waveform starts at time zero, and mask 
         # times after the start time
         times = (times - start_time)[t_mask]
-        
-        for i, (l,m,n) in enumerate(self.modes):
-            h[t_mask] += amplitudes[i]*(
-                np.conjugate(spheroidal(inclination, spin, l, m, n, phi=azimuth))\
-                *np.exp(-1j*(frequencies[i]*times+phases[i]))\
-                +spheroidal(np.pi-inclination, spin, l, m, n, phi=azimuth)\
-                *np.exp(1j*(np.conjugate(frequencies[i])*times+phases[i]))
-                )
         
         # Evaluate the ringdown sum
-        return h
-    
-    def waveform_isi(self, times, parameters):
-        r"""
-        Construct a sum of the ringdown modes, using the base ringdown 
-        function.
-
-        Parameters
-        ----------
-        time : array
-            The times at which the waveform is evaluated.
-            
-        parameters : dict
-            Dictionary containing all required parameters. Call the class 
-            .labels() function to see the required keys.
-
-        Returns
-        -------
-        array
-            The complex ringdown sum.
-        """
-        # Get amplitudes and phases from the parameters dict
-        amplitudes = np.array(
-            [parameters[n] for n in self.labels['rd_amplitudes']]
-            )
-            
-        phases = np.array(
-            [parameters[n] for n in self.labels['rd_phases']]
-            )
-            
-        # Other required parameters
-        inclination = parameters[self.labels['inclination'][0]]
-        azimuth = parameters[self.labels['azimuth'][0]]
-        start_time = parameters[self.labels['start_time'][0]]
-        mass = parameters[self.labels['mass'][0]]*self.conversion
-        spin = parameters[self.labels['spin'][0]]
-        
-        # Obtain the (complex) QNM frequency list
-        frequencies = [qnmomega(spin, *mode)/mass for mode in self.modes]
-        
-        # Create an empty array to add the result to
-        h = np.zeros(len(times), dtype=complex)
-        
-        # Mask so that we only consider times after the start time
-        t_mask = times >= start_time
-    
-        # Shift the time so that the waveform starts at time zero, and mask 
-        # times after the start time
-        times = (times - start_time)[t_mask]
-        
         for i, (l,m,n) in enumerate(self.modes):
             h[t_mask] += amplitudes[i]*(
                 spheroidal(inclination, spin, l, m, n, phi=azimuth)\
@@ -251,7 +196,6 @@ class ringdown:
                 *np.exp(1j*(np.conjugate(frequencies[i])*times-phases[i]))
                 )
         
-        # Evaluate the ringdown sum
         return h
 
 class wavelet_sum_v2:
