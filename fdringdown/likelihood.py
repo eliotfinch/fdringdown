@@ -12,7 +12,7 @@ class likelihood:
 
     Parameters
     ----------
-    time : array
+    times : array
         The times at which the waveform is evaluated.
         
     data : dict
@@ -21,7 +21,7 @@ class likelihood:
         
     model : class
         The model class to use in the likelihood calculation. See available
-        classes in ringdown.waveforms.
+        classes in fdringdown.waveforms.
         
     IFO_list : list
         A list of interferometer objects to include in the analysis. This is 
@@ -29,19 +29,21 @@ class likelihood:
         
     asd_dict : dict
         The ASD of the noise. This should be a dictionary with keys 
-        corresponding to the interferometer names. .
+        corresponding to the interferometer names.
+        
+    fixed_params
         
     f_range : tuple, optional
         The lower and upper frequencies of the likelihood integral in Hz. The 
         default is (32,512).
     """
     
-    def __init__(self, time, data, model, IFO_list, asd_dict, fixed_params={},
+    def __init__(self, times, data, model, IFO_list, asd_dict, fixed_params={},
                  f_range=(32,512)):
         """
         Initialize the class.
         """
-        self.time = time
+        self.times = times
         self.data = data
         self.model = model
         self.IFO_list = IFO_list
@@ -50,10 +52,10 @@ class likelihood:
         self.f_range = f_range
         
         # Time resolution
-        self.dt = time[1] - time[0]
+        self.dt = times[1] - times[0]
 
         # Number of data points in the analysis sample
-        K = len(time)
+        K = len(times)
         
         # Time duration
         self.T = K*self.dt
@@ -202,7 +204,7 @@ class likelihood:
         log_likelihood = 0
 
         # Create an instance of the model
-        model_waveform = self.model.waveform(self.time, parameters)
+        model_waveform = self.model.waveform(self.times, parameters)
 
         # Calculate the likelihood for each requested interferometer
         for IFO in self.IFO_list:
