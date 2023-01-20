@@ -76,14 +76,14 @@ class prior:
         
     def prior_transform(self, params):
         
-        for param_type, i in self.likelihood.param_locs_search.items():
+        for param_type, i in self.likelihood.param_locs_without_fixed.items():
             if param_type not in self.joint_priors_list:
                 prior_type, prior_params = self.prior_dict[param_type]
                 params[i] = self.prior_funcs[prior_type](params[i], **prior_params)
                 
         for param_type_i, param_type_j in self.joint_priors:
-            i = self.likelihood.param_locs_search[param_type_i]
-            j = self.likelihood.param_locs_search[param_type_j]
+            i = self.likelihood.param_locs_without_fixed[param_type_i]
+            j = self.likelihood.param_locs_without_fixed[param_type_j]
             prior_type, prior_params = self.prior_dict[param_type_i]
             params[i], params[j] = \
                 self.prior_funcs[prior_type]([params[i],params[j]], **prior_params)
@@ -93,18 +93,20 @@ class prior:
             if 'right_ascension' in self.likelihood.fixed_params:
                 ra = self.likelihood.fixed_params['right_ascension'][0]
             else:
-                ra = params[self.likelihood.param_locs_search['right_ascension']][0]
+                ra = params[self.likelihood.param_locs_without_fixed['right_ascension']][0]
+                
             if 'declination' in self.likelihood.fixed_params:
                 dec = self.likelihood.fixed_params['declination'][0]
             else:
-                dec = params[self.likelihood.param_locs_search['declination']][0]
+                dec = params[self.likelihood.param_locs_without_fixed['declination']][0]
+                
             if 'event_time' in self.likelihood.fixed_params:
                 t_event = self.likelihood.fixed_params['event_time'][0]
             else:
-                t_event = params[self.likelihood.param_locs_search['event_time']][0]
+                t_event = params[self.likelihood.param_locs_without_fixed['event_time']][0]
                     
             for param_type in self.likelihood.time_params:
-                param_loc = self.likelihood.param_locs_search[param_type]
+                param_loc = self.likelihood.param_locs_without_fixed[param_type]
                 params[param_loc] -= self.td(ra, dec, t_event)
         
         return params

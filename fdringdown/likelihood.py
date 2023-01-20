@@ -1,6 +1,6 @@
 import numpy as np
 
-from .utils import param_order, param_labels, remove_empty_keys
+from .utils import param_order, param_labels, latex_labels, remove_empty_keys
 
 
 class likelihood:
@@ -31,7 +31,12 @@ class likelihood:
         The ASD of the noise. This should be a dictionary with keys 
         corresponding to the interferometer names.
         
-    fixed_params
+    fixed_params : dict, optional
+        A dictionary with keys corresponding to the parameter type (e.g. 
+        rd_amplitudes), and values corresponding to a list of fixed parameter
+        values. Currently all parameters of a particular type have to be fixed
+        (i.e. there is no way to fix only one ringdown amplitude and leave
+        another free).
         
     f_range : tuple, optional
         The lower and upper frequencies of the likelihood integral in Hz. The 
@@ -75,7 +80,7 @@ class likelihood:
         self.create_labels()
                 
         # A dictionary with the location of each parameter in the labels_list 
-        # will be useful
+        # and labels_list_without_fixed will be useful
         self.param_locs = {}
         for param_type, labels in self.labels.items():
             self.param_locs[param_type] = []
@@ -83,19 +88,19 @@ class likelihood:
                 self.param_locs[param_type].append(self.labels_list.index(label))
         self.param_locs = remove_empty_keys(self.param_locs)
         
-        # Remove fixed parameters
-        self.param_locs_search = {}
-        for param_type, labels in self.labels_search.items():
-            self.param_locs_search[param_type] = []
+        self.param_locs_without_fixed = {}
+        for param_type, labels in self.labels_without_fixed.items():
+            self.param_locs_without_fixed[param_type] = []
             for label in labels:
-                self.param_locs_search[param_type].append(self.labels_list_search.index(label))
-        self.param_locs_search = remove_empty_keys(self.param_locs_search)
+                self.param_locs_without_fixed[param_type].append(
+                    self.labels_list_without_fixed.index(label)
+                    )
+        self.param_locs_without_fixed = remove_empty_keys(self.param_locs_without_fixed)
         
-        # Keeping track of parameters that change depending on frame will be
-        # useful
+        # Keep track of parameters that change depending on frame
         self.time_params = []
         for param_type in ['central_times', 'start_time']:
-            if param_type in self.param_locs_search.keys():
+            if param_type in self.param_locs_without_fixed.keys():
                 self.time_params.append(param_type)
                 
         # Create a version of fixed_params where the keys are the parameter
@@ -109,7 +114,7 @@ class likelihood:
             else:
                 self.fixed_params_merge[label] = values[0]
         
-        # The new number of parameters, with sky location params included and
+        # The new number of parameters, with extrinsic parameters included and
         # fixed parameters removed
         self.N_params = model.N_params + 4 - len(self.fixed_params_merge)
         
@@ -117,60 +122,61 @@ class likelihood:
         """
         Create a dictionary (self.labels) containing all the required 
         parameters for the initalized likelihood (this differs from the model 
-        labels because we now include sky location parameters). Also create 
-        lists of the labels (self.labels_text and self.labels_latex) for 
-        posterior headers and plotting.
+        labels because we now include extrinsic parameters). Also create lists
+        of the labels (self.labels_list and self.latex_labels_list) for 
+        posterior files and plotting.
         """
-        # Labels dictionary (which now includes sky location parameters)
-        sky_labels = {
-            'right_ascension':['ra'],
-            'declination':['dec'],
-            'event_time':['t_event'],
-            'polarization_angle':['psi']
-            }
+        # The additional extrinsic parameter "types" used in this waveform 
+        # (this should be a subset of the param_order list from utils)
+        extrinsic_params = [
+            'right_ascension',
+            'declination',
+            'event_time',
+            'polarization_angle'
+            ]
         
+        extrinsic_labels = {}
+        for param_type in extrinsic_params:
+            extrinsic_labels[param_type] = [param_labels[param_type]]
+            
+        extrinsic_labels_latex = {}
+        for param_type in extrinsic_params:
+            extrinsic_labels_latex[param_type] = [latex_labels[param_type]]
+        
+        # Label dictionary: keys are the param types (extrinsic and model), 
+        # values are a list of shorter param labels
         self.labels = {
             **self.model.labels,
-            **sky_labels
+            **extrinsic_labels
             }
         
-        # Remove fixed parameters
-        self.labels_search = self.labels.copy()
+        # Make a copy of the labels dict which doesn't include the fixed 
+        # parameters
+        self.labels_without_fixed = self.labels.copy()
         for param_type in self.fixed_params:
-            if param_type in self.labels_search:
-                self.labels_search.pop(param_type)
+            if param_type in self.labels_without_fixed:
+                self.labels_without_fixed.pop(param_type)
         
-        # Labels list
+        # Label list: ordered list of all param labels used in this likelihood
         self.labels_list = []
         for param_type in param_order:
             if param_type in self.labels.keys():
                 self.labels_list += self.labels[param_type]
                 
-        # Labels list without fixed parameters
-        self.labels_list_search = []
+        self.labels_list_without_fixed = []
         for param_type in param_order:
-            if param_type in self.labels_search.keys():
-                self.labels_list_search += self.labels_search[param_type]
+            if param_type in self.labels_without_fixed.keys():
+                self.labels_list_without_fixed += self.labels_without_fixed[param_type]
         
-        # LaTeX labels dictionary
-        sky_latex_labels = {
-            'right_ascension':[r'$\alpha$'],
-            'declination':[r'$\delta$'],
-            'event_time':[r'$t_\mathrm{event}$'],
-            'polarization_angle':[r'$\psi$']
-            }
-            
+        # LaTeX label dictionary: same as self.labels, but values are a list
+        # of LaTeX labels
         self.latex_labels = {
             **self.model.latex_labels,
-            **sky_latex_labels
+            **extrinsic_labels_latex
             }
         
-        # Remove fixed parameters
-        # for param_type in self.fixed_params:
-        #     if param_type in self.latex_labels:
-        #         self.latex_labels.pop(param_type)
-        
-        # LaTeX labels list
+        # LaTeX label list: ordered list of all LaTeX param labels used in 
+        # this likelihood
         self.latex_labels_list = []
         for param_type in param_order:
             if param_type in self.latex_labels.keys():
@@ -184,7 +190,7 @@ class likelihood:
         ----------
         parameters : dict
             A dictionary containing all required parameters. The items of the
-            class .labels are the required keys.
+            class .labels_without_fixed are the required keys.
 
         Returns
         -------
