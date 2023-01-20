@@ -363,7 +363,7 @@ class interferometer:
         delta_d = vertex - self.vertex
         
         # Calculate the distance along the direction of travel between the two
-        # posistions, and convert to a time
+        # positions, and convert to a time
         return np.dot(omega, delta_d)/c
     
     
