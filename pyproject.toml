@@ -18,7 +18,6 @@ dependencies = [
     "scipy",
     "matplotlib",
     "corner",
-    "qnm",
     "pykerr",
     "dynesty",
     "gwosc"
