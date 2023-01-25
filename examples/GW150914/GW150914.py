@@ -32,7 +32,7 @@ t_peak = 1126259462.423
 
 # Load the LIGO PSDs used in GWTC-1, https://dcc.ligo.org/LIGO-P1900011/public
 asd_dict = {}
-PSD_path = 'LVC_PSDs'
+PSD_path = 'GWTC1_PSD'
 for IFO_name in event.IFO_names:
     freqs, psd = np.loadtxt(f'{PSD_path}/{IFO_name}.dat').T
     # Square root to get the ASD, interpolate, and store to dictionary
