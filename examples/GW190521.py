@@ -10,12 +10,9 @@ from dynesty import plotting as dyplot
 
 # Package imports
 import fdringdown as rd
-from fdringdown.utils import Msun, G, c, identify_periodic_reflective, param_labels
-
-# 1D interpolation
-from scipy.interpolate import interp1d
-
-# import multiprocessing
+from fdringdown.utils import (
+    Msun, G, c, identify_periodic_reflective, param_labels, print_fn
+    )
 
 # Create the event class
 event = rd.GWevent('GW190521')
@@ -166,16 +163,16 @@ sampler = dynesty.NestedSampler(
    likelihood.dynesty_log_likelihood,
    prior_class.prior_transform,
    ndim,
-   nlive=4000,
+   nlive=500,
    sample='rwalk',
    periodic=periodic_indices,
    # reflective=reflective_indices,
-   walks=2000
+   walks=200
    )
 
 sampler.run_nested(
     checkpoint_file='dynesty.save',
-    checkpoint_every=7200
+    checkpoint_every=7200,
     # print_func=print_fn
     )
 
