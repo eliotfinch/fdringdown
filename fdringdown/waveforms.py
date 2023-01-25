@@ -301,7 +301,7 @@ class wavelet_sum:
                 *np.exp(-1j*2*np.pi*nu*(times-eta))\
                 + Am*np.exp(1j*phim)\
                 *np.exp(-((times-eta)/tau)**2)\
-                *np.exp(1j*2*np.pi*nu*(times-eta))\
+                *np.exp(1j*2*np.pi*nu*(times-eta))
         
         return h
     
