@@ -108,7 +108,7 @@ class likelihood:
         self.fixed_params_merge = {}
         for param_type, values in fixed_params.items():
             label = param_labels[param_type]
-            if len(values) > 1:
+            if '{}' in label:
                 for i, value in enumerate(values):
                     self.fixed_params_merge[label.format(i)] = value
             else:
@@ -250,7 +250,7 @@ class likelihood:
         """
         # Convert the list to a dictionary with the correct keys
         parameters_dict = {
-            self.labels_list_search[i]: param for i, param in enumerate(parameters)
+            self.labels_list_without_fixed[i]: param for i, param in enumerate(parameters)
             }
         
         return self.log_likelihood(parameters_dict)
