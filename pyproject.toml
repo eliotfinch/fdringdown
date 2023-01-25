@@ -15,12 +15,14 @@ license = { file="LICENSE" }
 requires-python = ">=3.8"
 dependencies = [
     "numpy",
+    "pandas",
     "scipy",
     "matplotlib",
     "corner",
     "pykerr",
     "dynesty",
-    "gwosc"
+    "gwosc",
+    "lalsuite",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
