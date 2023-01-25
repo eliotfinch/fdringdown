@@ -44,7 +44,7 @@ periodic_params = [
     'w_minus_phases',
     
     'rd_phases',
-    'azimuth'
+    'azimuth',
     
     'right_ascension',
     'polarization_angle'
