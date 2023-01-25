@@ -4,9 +4,8 @@ import matplotlib.pyplot as plt
 import corner
 
 from .utils import whiten
-from .waveform import wavelet
-from .waveform import wavelet_sum
-from .waveform import kerr_ringdown
+from .waveforms import wavelet_sum
+from .waveforms import ringdown
 
 class posterior:
     
