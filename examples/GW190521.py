@@ -18,7 +18,7 @@ from scipy.interpolate import interp1d
 # import multiprocessing
 
 # Create the event class
-event = rd.GWevent('GW150914')
+event = rd.GWevent('GW190521')
 
 # Get the event GPS time
 gps = event.parameters['GPS']
@@ -27,27 +27,55 @@ gps = event.parameters['GPS']
 Mf_det = (1+event.parameters['redshift'])*event.parameters['final_mass_source']
 Mf_det_seconds = Mf_det*Msun*G/c**3
 
-# Time of peak strain at Hanford, as used in https://arxiv.org/abs/1905.00869
-t_peak = 1126259462.423
+# Time of peak strain at Hanford, as used in https://arxiv.org/abs/2010.14529
+t_peak = 1242442967.42871
 
-# Load the LIGO PSDs used in GWTC-1, https://dcc.ligo.org/LIGO-P1900011/public
-asd_dict = {}
-PSD_path = 'LVC_PSDs'
+# Get a data segment without nans, needed for GW190521
+clean_time, clean_data = event.get_data_segment(
+    event.time,
+    event.data,
+    start_time=gps-700,
+    segment_length=1400*event.fs)
+
+# Following https://arxiv.org/abs/1409.7215 we estimate the ASD using 1024
+# seconds of off-source data. We use a segment of data centered on the event 
+# GPS time, where we exclude 4 seconds of data also centered on the GPS time.
+
+# Get the off-source data
+pre_off_source_time, pre_off_source_data = event.get_data_segment(
+    clean_time,
+    clean_data,
+    start_time=gps-2-512,
+    segment_length=512*event.fs)
+
+post_off_source_time, post_off_source_data = event.get_data_segment(
+    clean_time,
+    clean_data,
+    start_time=gps+2,
+    segment_length=512*event.fs)
+
+off_source_time = np.hstack((pre_off_source_time, post_off_source_time))
+off_source_data = {}
 for IFO_name in event.IFO_names:
-    freqs, psd = np.loadtxt(f'{PSD_path}/{IFO_name}.dat').T
-    # Square root to get the ASD, interpolate, and store to dictionary
-    asd_dict[IFO_name] = interp1d(freqs, np.sqrt(psd), bounds_error=False)
-    
-# Filter
-# filtered_data = event.filter_data(event.data, 4, 20, btype='highpass')
-filtered_data = {
-    IFO_name:event.data[IFO_name]-np.mean(event.data[IFO_name]) for IFO_name in event.IFO_names
-    }
+    off_source_data[IFO_name] = np.hstack(
+        (pre_off_source_data[IFO_name], post_off_source_data[IFO_name]))
+
+# Estimate the ASD
+asd_dict = event.estimate_asd(
+    off_source_data, nperseg=4*event.fs, noverlap=0, window=('tukey', 0.2), fs=event.fs)
 
 # Get the analysis data. We use 4 seconds of data centered on the GPS time.
 analysis_time, analysis_data = event.get_data_segment(
-    event.time,
-    filtered_data,
+    clean_time,
+    clean_data,
+    start_time=gps-2, 
+    segment_length=4*event.fs, 
+    window=('tukey', 0.2))
+
+# Get the analysis data. We use 4 seconds of data centered on the GPS time.
+analysis_time, analysis_data = event.get_data_segment(
+    clean_time,
+    clean_data,
     start_time=gps-2, 
     segment_length=4*event.fs, 
     window=('tukey', 0.2)
@@ -55,16 +83,20 @@ analysis_time, analysis_data = event.get_data_segment(
 
 #%% Model and likelihood classes
 
-Nwavelets = 3
-modes = [(2,2,0),(2,2,1)]
+Nwavelets = 1
+modes = [(2,2,0)]
 
 model = rd.wavelet_ringdown_sum(modes, Nwavelets)
 
 fixed_params = {
-    'w_plus_amplitudes': [0, 0, 0],
-    'w_plus_phases': [0, 0, 0],
-    'inclination': [np.pi],
+    'w_minus_amplitudes': [0],
+    'w_minus_phases': [0],
+    'start_time': [1242442967.4218216], # t0_geo = t0_Hanford - H1.time_delay([0,0,0], ra, dec, gps)
+    'inclination': [0],
     'azimuth': [0],
+    'right_ascension': [0.164],
+    'declination': [-1.14],
+    'polarization_angle': [2.38],
     'event_time': [gps],
     }
 
@@ -75,7 +107,7 @@ likelihood = rd.likelihood(
     event.IFO_list, 
     asd_dict, 
     fixed_params, 
-    f_range=(20,1000)
+    f_range=(11,1000)
     )
 
 #%% Prior
@@ -88,14 +120,14 @@ prior_dict = {
     'central_times': 
         ['normal', {'args':(t_peak, 50*Mf_det_seconds)}],
         
-    'w_minus_amplitudes': 
+    'w_plus_amplitudes': 
         ['uniform', {'args':(0, 1e-20)}],
         
-    'w_minus_phases': 
+    'w_plus_phases': 
         ['uniform_periodic', {'args':(0, 2*np.pi)}],
         
     'frequencies': 
-        ['uniform', {'args':(20, 200), 'hypertriangulate':True}],
+        ['uniform', {'args':(20, 100)}], # , 'hypertriangulate':True}],
         
     'damping_times': 
         ['uniform', {'args':(4*Mf_det_seconds, 80*Mf_det_seconds)}],
@@ -109,26 +141,12 @@ prior_dict = {
     'rd_phases': 
         ['uniform_periodic', {'args':(0, 2*np.pi)}],
         
-    'start_time': 
-        ['uniform', {'args':(t_peak-15*Mf_det_seconds, t_peak+15*Mf_det_seconds)}],
-        
     'mass':
-        ['uniform', {'args':(40, 100)}],
+        ['uniform', {'args':(100, 500)}],
         
     'spin':
         ['uniform', {'args':(0, 0.99)}],
         
-    # Extrinsic
-    # =========
-        
-    'right_ascension': 
-        ['uniform_periodic', {'args':(0, 2*np.pi)}],
-        
-    'declination': 
-        ['cos', {'args':(-np.pi/2, np.pi/2)}],
-        
-    'polarization_angle':
-        ['uniform_periodic', {'args':(0, np.pi)}]
     }
 
 prior_class = rd.prior(prior_dict, likelihood, frame='H1')
@@ -151,7 +169,7 @@ sampler = dynesty.NestedSampler(
    nlive=4000,
    sample='rwalk',
    periodic=periodic_indices,
-   reflective=reflective_indices,
+   # reflective=reflective_indices,
    walks=2000
    )
 
