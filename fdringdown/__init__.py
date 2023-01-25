@@ -4,3 +4,5 @@ from .interferometer import interferometer
 from .prior import prior
 from .likelihood import likelihood
 from .posterior import posterior
+
+from .Events.GWevent import GWevent
