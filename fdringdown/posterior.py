@@ -24,7 +24,7 @@ class posterior:
         # Other useful things stored in the likelihood
         self.labels = np.array(likelihood.latex_labels_list)
         self.data = likelihood.data
-        self.time = likelihood.time
+        self.times = likelihood.times
         self.dt = likelihood.dt
         self.model = likelihood.model
         
@@ -154,7 +154,7 @@ class posterior:
             ra, dec, t_event, psi = sample[-4:]
             
             # Evaluate the model for this posterior sample
-            model_waveform = self.model.waveform(self.time, sample)
+            model_waveform = self.model.waveform(self.times, sample)
             
             for IFO in self.likelihood.IFO_list:
                 
@@ -166,7 +166,7 @@ class posterior:
                 
         fig, axs = plt.subplots(nrows=len(self.likelihood.IFO_list), sharex=True, sharey=True)
         
-        plot_time = self.time - zero_time
+        plot_time = self.times - zero_time
         
         for i, IFO in enumerate(self.likelihood.IFO_list):
             
@@ -214,7 +214,7 @@ class posterior:
             psi = sample[self.likelihood.labels['polarization_angle'][0]]
             
             # Evaluate the model for this posterior sample
-            model_waveform = self.model.waveform(self.time, sample)
+            model_waveform = self.model.waveform(self.times, sample)
             
             for IFO in self.likelihood.IFO_list:
                 
@@ -230,7 +230,7 @@ class posterior:
         fig, axs = plt.subplots(
             nrows=len(self.likelihood.IFO_list), sharex=True, sharey=True)
         
-        plot_time = self.time - zero_time
+        plot_time = self.times - zero_time
         
         # Plot the whitened strain data and posterior waveforms for each IFO
         for i, IFO in enumerate(self.likelihood.IFO_list):
@@ -262,9 +262,9 @@ class posterior:
         sample = self.posterior_dict[-1]
         
         # Evaluate model
-        waveform = self.model.waveform(self.time, sample)
+        waveform = self.model.waveform(self.times, sample)
         
-        plot_time = self.time - zero_time
+        plot_time = self.times - zero_time
                 
         fig, ax = plt.subplots(figsize=(12,4))
         
@@ -292,9 +292,9 @@ class posterior:
             sky_params[label] = sample[label]
         
         # Evaluate model
-        waveform = self.model.waveform(self.time, sample)
+        waveform = self.model.waveform(self.times, sample)
         
-        plot_time = self.time - zero_time
+        plot_time = self.times - zero_time
                 
         fig, ax = plt.subplots(figsize=(12,4))
         
@@ -323,7 +323,7 @@ class posterior:
                 single_wavelet_params.update(sky_params)
                 
                 single_wavelet_waveform = single_wavelet_class.waveform(
-                    self.time, single_wavelet_params)
+                    self.times, single_wavelet_params)
                 
                 ax.plot(plot_time, np.real(single_wavelet_waveform), c=f'C{n+1}')
                 ax.plot(plot_time, -np.imag(single_wavelet_waveform), linestyle='--', c=f'C{n+1}')
@@ -344,7 +344,7 @@ class posterior:
                 single_wavelet_params.update(sky_params)
                 
                 single_wavelet_waveform = single_wavelet_class.waveform(
-                    self.time, single_wavelet_params)
+                    self.times, single_wavelet_params)
                 
                 ax.plot(plot_time, np.real(single_wavelet_waveform), c=f'C{n+1}')
                 ax.plot(plot_time, -np.imag(single_wavelet_waveform), linestyle='--', c=f'C{n+1}')
