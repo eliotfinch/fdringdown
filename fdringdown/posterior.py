@@ -135,7 +135,7 @@ class posterior:
         plt.savefig('mass_spin_corner.png')
         
         
-    def plot_waveform(self, sample_size=500, zero_time=0, 
+    def plot_waveform_sample(self, sample_size=500, zero_time=0, 
                       xlim=(-0.1,0.05)):
         
         # Dictionary to store the waveforms for each interferometer
@@ -256,13 +256,10 @@ class posterior:
         fig.savefig('whitened_waveforms.png', dpi=300, bbox_inches='tight')
         
         
-    def plot_max_likelihood_waveform(self, zero_time=0, xlim=(-0.1,0.05)):
-        
-        # The final posterior sample corresponds to the maximum likelihood
-        sample = self.posterior_dict[-1]
+    def plot_waveform(self, params, zero_time=0, xlim=(-0.1,0.05), filename=None):
         
         # Evaluate model
-        waveform = self.model.waveform(self.times, sample)
+        waveform = self.model.waveform(self.times, params)
         
         plot_time = self.times - zero_time
                 
@@ -276,23 +273,24 @@ class posterior:
         
         ax.legend()
         
+        if filename is None:
+            filename = 'waveform.png'
+        
         fig.savefig(
-            'maximum_likelihood_waveform_geocenter.png', 
+            filename, 
             dpi=300, 
-            bbox_inches='tight')
+            bbox_inches='tight'
+            )
         
-    def plot_waveform_decomposition(self, zero_time=0, xlim=(-0.1,0.05)):            
-        
-        # The final posterior sample corresponds to the maximum likelihood
-        sample = self.posterior_dict[-1]
+    def plot_waveform_decomposition(self, params, zero_time=0, xlim=(-0.1,0.05), filename=None):            
         
         sky_params = {}
         for param_type in ['right_ascension', 'declination', 'event_time', 'polarization_angle']:
             label = self.likelihood.labels[param_type][0]
-            sky_params[label] = sample[label]
+            sky_params[label] = params[label]
         
         # Evaluate model
-        waveform = self.model.waveform(self.times, sample)
+        waveform = self.model.waveform(self.times, params)
         
         plot_time = self.times - zero_time
                 
@@ -309,16 +307,15 @@ class posterior:
         
         if type(self.model).__name__ == 'wavelet_ringdown_sum':
             
-            single_wavelet_class = wavelet_sum(
-                1, ellipticity=self.model.wavelet_ellipticity)
+            single_wavelet_class = wavelet_sum(1)
             
             for n in range(self.model.Nwavelets):
                 
                 single_wavelet_params = {}
-                for param_name in sample.keys():
+                for param_name in params.keys():
                     if param_name[-1] == str(n):
                         new_key = param_name.replace(str(n),'0')
-                        single_wavelet_params[new_key] = sample[param_name]
+                        single_wavelet_params[new_key] = params[param_name]
                 
                 single_wavelet_params.update(sky_params)
                 
@@ -330,16 +327,15 @@ class posterior:
                 
         elif type(self.model).__name__ == 'wavelet_sum':
             
-            single_wavelet_class = wavelet_sum(
-                1, ellipticity=self.model.ellipticity)
+            single_wavelet_class = wavelet_sum(1)
             
             for n in range(self.model.Nwavelets):
                 
                 single_wavelet_params = {}
-                for param_name in sample.keys():
+                for param_name in params.keys():
                     if param_name[-1] == str(n):
                         new_key = param_name.replace(str(n),'0')
-                        single_wavelet_params[new_key] = sample[param_name]
+                        single_wavelet_params[new_key] = params[param_name]
                 
                 single_wavelet_params.update(sky_params)
                 
@@ -354,7 +350,11 @@ class posterior:
         
         ax.legend()
         
+        if filename is None:
+            filename = 'waveform_decomposition.png'
+            
         fig.savefig(
-            'maximum_likelihood_waveform_geocenter_decomposition.png', 
+            filename, 
             dpi=300, 
-            bbox_inches='tight')
+            bbox_inches='tight'
+            )
