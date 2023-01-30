@@ -1,6 +1,9 @@
 # GW data
 fdringdown/data/GW_events/
 
+# Analysis results
+runs
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
