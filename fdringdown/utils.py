@@ -94,28 +94,28 @@ param_labels = {
 latex_labels = {
     
     # Wavelets
-    'central_times': '$\eta_{}^\mathrm{{geo}}$',
-    'w_plus_amplitudes':'$\mathcal{{A}}^+_{}$',
-    'w_minus_amplitudes':'$\mathcal{{A}}^-_{}$',
-    'w_plus_phases':'$\Phi^+_{}$',
-    'w_minus_phases':'$\Phi^-_{}$',
-    'frequencies':'$\nu_{}$',
-    'damping_times':'$\tau_{}$',
+    'central_times':r'$\eta_{}^\mathrm{{geo}}$',
+    'w_plus_amplitudes':r'$\mathcal{{A}}^+_{}$',
+    'w_minus_amplitudes':r'$\mathcal{{A}}^-_{}$',
+    'w_plus_phases':r'$\Phi^+_{}$',
+    'w_minus_phases':r'$\Phi^-_{}$',
+    'frequencies':r'$\nu_{}$',
+    'damping_times':r'$\tau_{}$',
     
     # Ringdown
-    'start_time':'$t_0^{\mathrm{geo}}$',
-    'rd_amplitudes':'$A_{}$',
-    'rd_phases':'$\phi_{}$',
-    'mass':'$M_f\ [M_\odot]$',
-    'spin':'$\chi_f$',
-    'inclination':'$\iota$',
-    'azimuth':'$\varphi$',
+    'start_time':r'$t_0^{\mathrm{geo}}$',
+    'rd_amplitudes':r'$A_{}$',
+    'rd_phases':r'$\phi_{}$',
+    'mass':r'$M_f\ [M_\odot]$',
+    'spin':r'$\chi_f$',
+    'inclination':r'$\iota$',
+    'azimuth':r'$\varphi$',
     
     # Extrinsic
-    'right_ascension':'$\alpha$',
-    'declination':'$\delta$',
-    'event_time':'$t_\mathrm{event}$',
-    'polarization_angle':'$\psi$'
+    'right_ascension':r'$\alpha$',
+    'declination':r'$\delta$',
+    'event_time':r'$t_\mathrm{event}$',
+    'polarization_angle':r'$\psi$'
     
     }
 
