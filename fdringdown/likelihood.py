@@ -181,6 +181,11 @@ class likelihood:
         for param_type in param_order:
             if param_type in self.latex_labels.keys():
                 self.latex_labels_list += self.latex_labels[param_type]
+                
+        self.latex_labels_list_without_fixed = []
+        for param_type in param_order:
+            if param_type in self.labels_without_fixed.keys():
+                self.latex_labels_list_without_fixed += self.latex_labels[param_type]
             
     def log_likelihood(self, parameters):
         """
