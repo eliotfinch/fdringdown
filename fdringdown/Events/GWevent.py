@@ -83,7 +83,7 @@ class GWevent(EventClass):
                         url, filename=self.dd + '/' + fn)
                     
             # Download the event json
-            event_json = fetch_event_json(self.name, version=3)['events']
+            event_json = fetch_event_json(self.name)['events']
             
             # Access the highest level key (which is just the event name with 
             # a version), and store
