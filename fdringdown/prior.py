@@ -25,7 +25,8 @@ class prior:
             'uniform_sum': self.uniform_sum,
             'uniform_periodic': self.uniform_periodic,
             'normal': self.normal,
-            'cos': self.cos
+            'cos': self.cos,
+            'sin': self.sin
             }
         
     def td(self, ra, dec, t_event):
@@ -73,6 +74,12 @@ class prior:
             
         lower, upper = args
         return np.arcsin(params*(np.sin(upper)-np.sin(lower)) + np.sin(lower))
+    
+    def sin(self, params, args):
+        
+        lower, upper = args
+        norm = 1/(np.cos(lower) - np.cos(upper))
+        return np.arccos(np.cos(lower) - params/norm)
         
     def prior_transform(self, params):
         
