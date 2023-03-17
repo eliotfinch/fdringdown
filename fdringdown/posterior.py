@@ -190,7 +190,8 @@ class posterior:
         
         
     def plot_whitened_waveform(self, sample_size=500, zero_time=0, 
-                               xlim=(-0.1,0.05), asd_dict=None):
+                               xlim=(-0.1,0.05), asd_dict=None, 
+                               f_range=(32,512)):
         
         if asd_dict is None:
             asd_dict = self.likelihood.asd_dict
@@ -224,7 +225,7 @@ class posterior:
 
                 # Whiten the waveform and store
                 whitened_waveforms[IFO.name].append(whiten(
-                    IFO_response, asd_dict[IFO.name], self.dt))
+                    IFO_response, asd_dict[IFO.name], self.dt, f_range))
         
         # Create figure
         fig, axs = plt.subplots(
@@ -237,7 +238,7 @@ class posterior:
             
             # Strain data
             whitened_data = whiten(
-                self.data[IFO.name], asd_dict[IFO.name], self.dt)
+                self.data[IFO.name], asd_dict[IFO.name], self.dt, f_range)
             
             axs[i].plot(plot_time, whitened_data, color='k', alpha=0.3)
             
