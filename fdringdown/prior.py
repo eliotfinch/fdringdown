@@ -17,6 +17,39 @@ class prior:
         self.joint_priors_list = [
             param_type for pair in joint_priors for param_type in pair]
         
+        # If the user has specified the prior via the parameter type, then we 
+        # can apply the transform in parallel (this allows hypertriangulation,
+        # for example)
+        grouped_transform = {}
+        
+        # If the user has specified the prior via the parameter label, then
+        # we apply the prior transform on this parameter individually
+        single_transform = {}
+        
+        # Finally, the user might have a prior on a non-standard parameter
+        # (such as an amplitude ratio), which needs to be dealt with
+        self.special_transform = {}
+        
+        for key, value in self.prior_dict.items():
+            
+            if key in self.likelihood.labels_without_fixed:
+                grouped_transform[key] = self.likelihood.param_locs_without_fixed[key]
+                
+            elif key in self.likelihood.labels_list_without_fixed:
+                single_transform[key] = self.likelihood.labels_list_without_fixed.index(key)
+                
+            else:
+                # There will be a better way to do this, but for amplitude 
+                # ratios we know the parameter label we're after is given by
+                target_key = key[:-7]
+                # (this cuts the '_over_n' part of the string)
+                
+                self.special_transform[key] = self.likelihood.labels_list_without_fixed.index(target_key)
+        
+        # The single and grouped transforms behave the same in the prior 
+        # transform, so we merge them
+        self.param_locs = {**single_transform, **grouped_transform}
+        
         if frame != 'geo':
             self.IFO = interferometer(frame)
         
@@ -46,7 +79,7 @@ class prior:
         return (params%1)*(upper-lower) + lower
     
     def uniform_sum(self, params, args):
-        # See `amplitude_prior_transform` in examples for more information
+        # See `amplitude_prior_transform` in notebooks for more information
         
         x, y = params
         lower, upper = args
@@ -83,17 +116,26 @@ class prior:
         
     def prior_transform(self, params):
         
-        for param_type, i in self.likelihood.param_locs_without_fixed.items():
-            if param_type not in self.joint_priors_list:
-                prior_type, prior_params = self.prior_dict[param_type]
-                params[i] = self.prior_funcs[prior_type](params[i], **prior_params)
-                
-        for param_type_i, param_type_j in self.joint_priors:
-            i = self.likelihood.param_locs_without_fixed[param_type_i]
-            j = self.likelihood.param_locs_without_fixed[param_type_j]
-            prior_type, prior_params = self.prior_dict[param_type_i]
-            params[i], params[j] = \
-                self.prior_funcs[prior_type]([params[i],params[j]], **prior_params)
+        for param_type, i in self.param_locs.items():
+            # if param_type not in self.joint_priors_list:
+            prior_type, prior_params = self.prior_dict[param_type]
+            params[i] = self.prior_funcs[prior_type](params[i], **prior_params)
+            
+        for param, i in self.special_transform.items():
+            
+            # Apply the prior transform
+            prior_type, prior_params = self.prior_dict[param]
+            transformed_param = self.prior_funcs[prior_type](params[i], **prior_params)
+            
+            # Convert this to the parameter that the likelihood wants
+            params[i] = transformed_param*params[self.likelihood.labels_list_without_fixed.index('A_rd_0')]
+            
+        # for param_type_i, param_type_j in self.joint_priors:
+        #     i = self.likelihood.param_locs_without_fixed[param_type_i]
+        #     j = self.likelihood.param_locs_without_fixed[param_type_j]
+        #     prior_type, prior_params = self.prior_dict[param_type_i]
+        #     params[i], params[j] = \
+        #         self.prior_funcs[prior_type]([params[i],params[j]], **prior_params)
         
         if self.frame != 'geo':
             
