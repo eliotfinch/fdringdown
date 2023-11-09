@@ -6,9 +6,11 @@ import shutil
 from collections import namedtuple
 
 # Define constants (SI units)
-Msun = 1.9884e30
-G = 6.674e-11
-c = 299792458.0
+import scipy.constants as consts
+G, c = consts.G, consts.c
+
+import astropy.constants as astro_consts
+Msun = astro_consts.M_sun.value
 
 # Dynesty requires array inputs (instead of dictionaries), and so we need to
 # define a order for the parameters. Use the parameter type, not the shorter
