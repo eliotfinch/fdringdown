@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "fdringdown"
 version = "0.0.1"
 authors = [
-  { name="Eliot Finch", email="efinch@star.sr.bham.ac.uk" },
+  { name="Eliot Finch", email="efinch@caltech.edu" },
   { name="Christopher J. Moore", email="cmoore@star.sr.bham.ac.uk"},
 ]
 description = "Frequency-domain analysis of ringdown signals"
@@ -31,4 +31,4 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/EliotFinch/fdringdown"
+"Homepage" = "https://github.com/eliotfinch/fdringdown"
