@@ -25,6 +25,16 @@ param_order = [
     'w_minus_phases',
     'frequencies',
     'damping_times',
+
+    # IMRPhenomD
+    'mass_1',
+    'mass_2',
+    'spin_1',
+    'spin_2',
+    'distance',
+    'imr_inclination',
+    'imr_phase',
+    'peak_time',
     
     # Ringdown
     'start_time',
@@ -48,6 +58,8 @@ periodic_params = [
     
     'w_plus_phases',
     'w_minus_phases',
+
+    'imr_phase',
     
     'rd_phases',
     'azimuth',
@@ -74,6 +86,16 @@ param_labels = {
     'w_minus_phases':'phim_w_{}',
     'frequencies':'nu_{}',
     'damping_times':'tau_{}',
+
+    # IMRPhenomD
+    'mass_1':'m_1',
+    'mass_2':'m_2',
+    'spin_1':'chi_1',
+    'spin_2':'chi_2',
+    'distance':'d_L',
+    'imr_inclination':'iota_imr',
+    'imr_phase':'phi_imr',
+    'peak_time':'t_peak',
     
     # Ringdown
     'start_time':'t_0',
@@ -103,6 +125,16 @@ latex_labels = {
     'w_minus_phases':r'$\Phi^-_{}$',
     'frequencies':r'$\nu_{}$',
     'damping_times':r'$\tau_{}$',
+
+    # IMRPhenomD
+    'mass_1':r'$m_1\ [M_\odot]$',
+    'mass_2':r'$m_2\ [M_\odot]$',
+    'spin_1':r'$\chi_1$',
+    'spin_2':r'$\chi_2$',
+    'distance':r'$d_L\ [\mathrm{Mpc}]$',
+    'imr_inclination':r'$\iota_\mathrm{IMR}$',
+    'imr_phase':r'$\phi_\mathrm{IMR}$',
+    'peak_time':r'$t_\mathrm{peak}$',
     
     # Ringdown
     'start_time':r'$t_0^{\mathrm{geo}}$',
