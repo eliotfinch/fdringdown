@@ -9,6 +9,8 @@ from scipy.interpolate import interp1d
 # Vector rotation
 from scipy.spatial.transform import Rotation as R
 
+import warnings
+warnings.filterwarnings("ignore", "Wswiglal-redir-stdio")
 import lal
 
 # Constants
