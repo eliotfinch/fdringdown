@@ -62,6 +62,10 @@ class GWevent(EventClass):
                 
             # Get the detectors that observed this event
             self.IFO_names = datasets.event_detectors(self.name)
+
+            # Lets ignore G1 for now
+            if 'G1' in self.IFO_names:
+                self.IFO_names.remove('G1')
             
             # Save the set of IFO names
             with open(self.dd + '/IFO_names.json', 'w') as f:
